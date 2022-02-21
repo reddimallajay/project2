@@ -1,0 +1,488 @@
+-----How to create database for example of database creattion-------
+create database uk
+---- How to use existing database syntax wise ----------
+use uk
+-----How to remove existing database--------------
+drop database uk
+-----------How to create table example of order---
+create table emp(id int ,name varchar(100))
+-------- insert data into emp table -----
+insert into emp values (1,'k'),(2,'j')
+------alter table with new column ------------
+alter table emp add city varchar(100) 
+----------how to see the data-----------------------
+select*from emp
+-----------how to remove column an existing table --------
+alter table emp drop column city
+------add new cloumn with values --------------
+alter table emp add deptno int default (100)
+--------then insert into deptno column--------
+insert into emp values (3,'h',20)
+-----------drop table-------------
+alter table emp drop column deptno
+-------- alter table add new column with values------------
+alter table emp add deptno int default (1000) with values
+------drop constarint ----------------
+alter table emp drop constraint DF__emp__deptno__47DBAE45 
+---------------- update column -----------------
+update emp set name='n'where id=1
+update emp set deptno=10 where name='n'
+------- multiple rows update statement------------------
+update emp 
+   set deptno =case[id]
+    when 1 then 10
+	when 2 then 20
+	when 3 then 30
+	end
+	where id in (1,2,3)
+-------primary key on specific column name-----------------------------------
+primary key rule:: what ever insert the values into column must be unique and not null values
+not null means --won't allow null values and should't insert existing or repeating values 
+create table t1 (id int primary key,name varchar(10))
+insert into t1 values (1,'a')--- this scenario won't be insert duplicate key
+which we have to specify the pk 
+--------primary key on whole table -----------------------------------------
+create table t2 (id int ,name varchar(10) primary key)
+insert into t2 values(1,'a')
+insert into t2 values (1,'b')-- this scenario combination of keys are won't be insert 
+-----------not null on specific column---------------------------------------
+create table t3 (id int, name varchar(10) not null)
+insert into t3 values (1, null)-----this scenario we are specify the not null constarint on name column 
+--so won'tbe inserted the null values on parrticular column 
+----------deafult on particular column that means not null -------------------------
+create table t4 (id int ,name varchar(10) default('NA'))
+insert into t4 values (1,null)- this scenario we are insert null values by default automaticaly it will taken 'NA'
+------------foreignn key----------------------------------------------------------
+--foreign key can integrity condition whatever present the values of primary table can insert the 
+--those values into secondary table and must be both tables are one column matching 
+--- one table one or more than foreign keys are creating
+------ primary key is only one in each table
+create table country (cid int  primary key,cname varchar(10))
+insert into country values(2,'canada'),(3,'usa')------ this is parent table
+drop table if exists states
+ create table states(sid int primary key ,sname varchar(100),
+ cid int references country (cid))
+ insert into states values(4,'ap',3),(5,'tn',3),(6,'mum',3)///,(4,'ker',4) ----- this is child table 
+ --- above scenario won't insert 4 th row beacuse only parent table whatever data present that data can be insert into child table 
+ ------------------ sub queries------------------------------------------------------------------
+  select * from states where cid=(select cid from country where cname ='uk')
+  (select cid from country where cname ='uk')---- this sub query or inner query
+  select * from states where cid= ------- this is outer query
+  --- sub query(inner query execute  first return the value then on top of the result execute full query)
+  -------- we want more than one result we have to use instead of = >in 
+  select * from states where cid in (select cid from country where cname in ('uk','usa'))
+  ------ sub query usally fetch the result between to  two tables
+  --------------------------wild card search-----------------------------------------------------
+  whatever read the data partially we will use the wild card search on bases of emp table 
+  select * from emp
+  insert into emp values(7999,'raj2','salesman',7902,getdate(),1000,200,20)
+ -- i want whose employee name start with 's'
+ select * from emp where ename like 's%'
+ -- i want whose employee name end with 'e'
+ select * from emp where ename like '%e'
+ -- i want whose employee name start with 'a' and second character should be anything and third character should be 'a'
+ select * from emp where ename like 'a_a%'--- here '_' indicates only one character
+ --i want only four character of name from table 
+ select * from emp where ename like '____'-- this indicates'____' four characters of the name
+ -----i want whose name atleast one 'a' character in the  emplyoee name 
+ select * from emp where ename like '%a%'
+ ------ i want whose employee atleast one numerical value name
+ select * from emp where ename like '%[0-9]%'
+  ------ i want whose employee atleast one numerical value name
+select * from emp where ename not like '%[0-9]%' another typr we read data 
+select * from emp where ename like '%[^0-9]%' -- instead of not place we use'^'
+----------------------- between operator----------------------------------
+select * from emp where sal between 800 and 2500--- instead of between place =<,>=
+select * from emp where sal>=800 and sal<=2500
+------------------------------------------------------------------------------------------
+------------------------group by clause with aggregate functions------------------------------
+-----i want count of empno of each dept
+select count(empno) from emp group by deptno
+---- similarly count of empno along with deptno numnber number
+select count(empno), deptno from emp group by deptno
+-----similarly aggregate functions like max(),min(),avg()
+select count (empno),max(sal),min(sal),avg(sal) from emp group by deptno
+---this time more than two employees are their in which dept 
+select count(empno),deptno from emp group by deptno having count(empno)>2
+---------- i wanna hows many employees are their in each dept whose name start with 's'
+select count(empno),deptno from emp where ename like 's%' group by deptno
+select count(1),deptno from emp where ename like 's%' group by deptno having count (1)>1 order by 1 asc
+-------------- whenever writing a query first will come on where clause then group by then having clause and finally order by clause 
+--one more thing' alis '
+select count(1) as cnt,deptno from emp where ename like 's%' group by deptno having count (1)>1 order by cnt asc
+-- alis will be consider in order by clause in the same query and order by clause can be anything accept
+select count(1),deptno from emp where ename like 's%' group by deptno having cnt (1)>1 order by 1 asc
+---alis  won't be allow into having clause in the same query
+-------------------------Inlineview---------------------------------------------------------------------
+ select * from (select count (1) as cnt,deptno from emp where ename like 's%' group by deptno)x
+where cnt>1--- in this scenario alias will be accept on top of the inlineview query
+--another thing just put into front of query select * from in inlineview
+-------------------------------------------------------------------------------------------------
+CTE::
+-- cte query start's with 
+ with x as (select count (1) as cnt,deptno from emp where ename like 's%' group by deptno)
+ select * from x
+ ------cte has advantage 
+--1.to delete duplicates
+---2.bring hiraracical data
+------- how to delete duplicate values
+create table t5 (id int)
+insert into t5 values (1),(1),(2),(4),(3),(4),(2),(3)
+ ----before go to the delete we are discussing some analytical functions
+ ----1.row()number 2.rank()3.dense_rank()4.ntile
+ --- row_number: this function can be use in query separate the rows.
+ ---- who is the person taking the 1 st and 5th highest salary geting table then go to row_number function
+ with cte as(select row_number()over(order by sal desc) as rid, * from emp) 
+  select * from cte where rid in (1,5)--- it bring N number of values
+  ---- i want each dept get highest salary 
+   with cte as(select row_number()over( partition by deptno order by sal desc) as rid, * from emp) 
+  select * from cte where rid =1-- this time each dept so we are going to partition by on row_number function
+  ------rank() function-------------------------
+  with cte as(select rank()over(order by sal desc) as rid, * from emp) 
+  select * from cte 
+  --- rank function is  skip the value it will be shown on same sal from emp
+  ------------ dense_rank()---------------------------------------------------------
+  with cte as(select dense_rank()over(order by sal desc) as rid, * from emp) 
+  select * from cte 
+  ------ dense _rank () is not  skip the value it will be shown on same sal from emp decided the rank 
+  ---aggregates with over clause is called window functions
+  -- i want to running total how do you generate 
+  select sum (sal) over (order by empno desc), sal from emp
+  --- i want to running total each dept
+  select sum(sal) over ( partition by deptno order by empno desc),sal,deptno from emp
+  ---------------- now delete duplicate values-----------------
+with x as (
+ select row_number () over (partition by id order by id asc)  as rid, * from t5)
+select* from x where rid>1
+-------------- cte won't wrok on the third line---------
+------------------------------------------------------------------------------------------
+joins::
+  inner join: inner join matching the data from both the table 
+  lefr join : left join along with matching the data extra left side data
+  right join :right join along with matching the data  extra right side data 
+  fuller join : fuller join along with matching the data an extra left and right side data
+  -- cross join
+  --self join
+  --anti join
+   create table t6(id int )
+   insert into t6 values(1),(2),(3),(4)
+   create table t7 (id int)
+   insert into t7 values(3),(4),(5),(6),(7)
+
+  inner join: 
+   select * from t6 inner join t7 on t6.id=t7.id
+   select * from t6 as a inner join t7 as b on a.id=b.id------ this time alias used
+  left join:
+   select * from t6 left join t7 on t6.id=t7.id
+   select * from t6 as a left join t7 as b on a.id=b.id------ this time alias used
+   select * from t7 left join t6 on t7.id=t6.id------ worest scenario of right join so we use left join 
+
+  right join:
+   select * from t6 right join t7 on t6.id=t7.id
+   select * from t6 as a right join t7 as b on a.id=b.id------ this time alias used
+   fuller join:
+   select * from t6 full join t7 on t6.id=t7.id
+   select * from t6 as a full join t7 as b on a.id=b.id------ this time alias used
+   ---- null is null ,null= null not matching in inner join so eliminate the null value
+   cross join :
+   select * from t6,t7---- cross join is no of records of the first table * no of records of the second table
+-- cross join can also write ',' or cross apply between the tables
+----------------------------------------------------------------------------------------------------------------------------------------
+string functions::
+
+declare @name nvarchar(max)='rajabshaik2@gmail.com'
+select len(@name)---- this string function shows total characters of the variable
+select left (@name,2)--- this string function shows left side of the characters of the variable . here two parameters are used one is variable another one is mention the how many characters left side  
+select right(@name,5)--- this string function shows right side of the characters of the variable . here two parameters are used one is variable another one is mention the how many characters right side 
+select CHARINDEX ('@',@name,1)--- this string function shows identify the '@' from the string first position.three parameters are used 1 st is which characters identify and 2 nd on is string ,3 rd one is which position you want
+select substring(@name,5,21)----this string function shows i want from '@' to rest of the all characters.this string can 3 parameters  1 st one is original string .2 nd one is which  position  do you want  from 3 rd one is how many characters are do you want
+select SUBSTRING(@name,CHARINDEX ('@',@name,1)+1,len(@name))---- this is soft coding instead of hard coding 
+select replace (@name,'b','bb')--- this string function shows the 3 parameters 1 st one is original string 2 nd one is which character position  you have to replace mention that 3 rd one is which character you have to replace instead of replace the character.
+select STUFF(@name,CHARINDEX ('@',@name,1),2,'#')---- this string function shows the 4 parameters 1 st one is original string 2 nd one is which character position  you have to remove 3 rd one is how many charaters are remove  4 th one is what you have to replace 
+declare @name nvarchar(max)=',a,b,c,d'
+select STUFF(@name,1,1,'')
+select UPPER(@name)----------- this string function can result capital letters ,only original string parameter
+select LOWER(@name)-------------- this string function can result small letters ,only original string parameter
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+string_split: --this string can split the commas from variable, here  2 parameters  1 st one is original string 2 nd one is what you want to remove mention that
+select * from string_split (@country,',')
+ looping the date from variable for removing the cammas
+declare @country nvarchar(max)='Ind_indai,Us_united states,Jp_japan,'
+declare @p int=charindex(',',@country,0),@pp int =0
+while (@p>0)
+begin
+ print substring(@country,@pp,@p-@pp)
+ set @pp=@p+1
+ set @p=charindex(',',@country,@pp)
+ end
+
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------
+ date functions::
+
+ select getdate()------- this function gets the current datetime of system
+ select GETUTCDATE()  ------------- this  function gets the universal datetime
+ select DATEADD(dd,1,getdate())---- this function gets next day datetime
+ select DATEADD(dd,-1,getdate()) --- this function gets yesterday datetime
+ select DATEADD(mm,1,getdate())---------- this function gets next month datetime
+ select DATEADD(mm,-1,getdate())--------this function gets last month datetime
+ select DATEADD(yyyy,1,getdate())--------this function gets next year datetime
+ select DATEADD(yyyy,-1,getdate())--------this function gets last year datetime
+ select DATEPART(dw,getdate())---------- this function gets week number
+ select DATEname(dw,getdate())--------- this function gets week name 
+ select DATEDIFF(YYYY,'04/24/1995',getdate())---- this function gets years diff between the two dates
+ select EOMONTH(getdate())-------- this function gets last day of the current month
+ select DATEADD (dd,1,EOMONTH (getdate())) --- this function gets next month 1 st
+ select EOMONTH(DATEADD(mm,1,getdate()))--------- this function gets next month end date
+ select convert(varchar(20),getdate(),107)------- this function gets different styles of date format.this has three parameters 1 st one has datatype,2nd one has getdate(), 3 rd one has format snumbers 101 to 120 
+ -- how to get date of birth how many years and every year date name 
+ declare @i int =1,@yrs int =datediff(YYYY,'04/24/1995',getdate())
+ while(@i<=@yrs)
+ begin
+   select dateadd(YYYY,@i,'04/24/1995'),DATEname(dw,dateadd(yyyy,@i,'04/24/1995'))
+   set @i+=1
+   end
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+conversation function::
+
+--------------------convert has two parameters 1 st one has datatype,2 nd one has value
+--------------------cast has two parameters 1 st one has value ,2 nd one has datatype
+ select convert (varchar(100),1000)+convert(varchar(100),1)
+ select cast(1000 as varchar(100))+cast(1 as varchar(100)) this functions are usually string function convert into int 
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ Quorelated query::
+ exists& not exists
+ select * from emp  o where exists (select top 1 1 from dept i where o.deptno=i.deptno and i.dname='accounting')
+
+ --- this query  has outer and inner query .inner query gets output exists in outer query 
+ select * from emp o where not exists (select top 1 1 from dept i where o.deptno=i.deptno and i.dname='accounting')--here  not exists use apart from accounting result can be retrive
+
+
+ sub query::
+  select * from emp o where deptno=(select top 1 deptno from dept i where i.dname ='accounting')
+  select * from emp o where deptno not in (select top 1 deptno from dept i where i.dname='accounting')-- here  not in use apart from accounting result can be retrive
+
+  --- sub query return more than lack won't go for sub query . go to the joins
+
+  select * from emp e inner join dept d on e.deptno=d.deptno where d.dname='accounting'---- best experiance on joins
+
+  select * from emp e inner join dept d on e.deptno=d.deptno where d.dname! ='accounting'--here '!'  use apart from accounting result can be retrive
+
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  recursive cte :: 1 to 10 how to recursive the value upto 10
+
+  with x as (select 1 as id 
+  union all
+  select id+1 as id from x where id<10-- break down upto 10
+  ) select* from x
+
+  --- similarly from emp table i want manager to manager and manager to manager (down to top manager )
+  select * from emp
+  with cte as (select * from emp where empno=7876
+  union all 
+  select e.* from emp e inner join cte c on c.mgr =e.empno-- condition is manager number hold on cte bring the employee  related  detailes of that manager empno number hold on emp, 
+  ) select * from cte
+   --- similarly from emp table i want manager to manager and manager to manager (top to down manager )
+  select * from emp
+
+  with cte as (select * from emp where empno=7839
+  union all
+  select e.* from emp e inner join cte c on c.empno=e.mgr--condition is empno number hold on cte  bring the manager related detailes of that employee manager number hold on emp
+  ) select * from cte
+   -- similarly one more example of recursive cte 
+
+   with x as (select cast('04/24/1995' as date) as dob ,datename(dw,'04/24/1995') as weekname--- cast will be cast the date of birth
+   union all
+   select dateadd(yyyy,1,dob),datename(dw,dateadd(yyyy,1,dob)) from x where dob<getdate()--- here where will be break the recursive condition.
+   ) select * from x
+
+   ---- similarly one more example of recursive cte
+
+   with allrecords as (select row_number() over (order by empno asc) as rid ,*from emp),----- here nested cte is required because row_ number () uses create rid separately then rid uses in next line and two cte are in query first cte as with clause end of the query just put in ',' then write a second query 
+    x as ( select sal as total, *from allrecords where rid=1
+   union all
+   select total + a.sal, a.*from x inner join allrecords a on x.rid+1=a.rid---- here condition is x. rid+1=a.rid >>> rid=1, rid+1 means 1+1=2 it brings 2 nd rid sal from allrecords it will be add sal as total from x
+   ) 
+   select * from x
+
+
+   ----------------------------------------------------------------------------------------------------------------------------------------------------------
+   procedures::
+
+    create table t8 (id int,name varchar(100))
+
+    create proc usp_save_t8(@id int ,@name varchar(100))as------------- this is insert procedure
+    begin
+     insert into t8 values(@id,@name)
+      	  
+    end
+
+    exec usp_save_t8 @id=2,@name='sham'
+
+    create proc usp_update_t8(@id int ,@name varchar(100))as------- this is update procedure
+    begin
+      update t8 set name=@name where id=@id;
+    end
+	exec usp_update_t8 @id=1,@name='rajab'
+
+	create proc usp_delete_t8(@id int ,@name varchar(100))as---------------this is delete procedure
+    begin
+	  delete  from t8 where id=@id---------- here only one parameter will be taken on delete procedure
+	end
+
+	exec usp_delete_t8 @id=1,@name='rajab'
+
+	---------------------------------------------------------------------------------------------------------------------------------------------------------
+	ERROR handling ::
+	alter table t8 alter column name varchar(5)
+    alter proc usp_save_t8 (@id int ,@name varchar(100))as
+	begin
+	      begin try
+		  insert into t8 values (@id,@name)-------whatever your prediction go wrong in future then onli put into try block otherwise keep everything in outside
+		  end try
+		  begin catch ------ here raise the error in catch block
+		  declare @error_message nvarchar(max)='hey hai catched me !....'+error_message();
+		  declare @eid int=error_number()
+		  insert into error_tbl1 values(@eid ,@ERROR_MESSAGE,getdate(),object_name(@@PROCID))-----  object_name or proc id both are same here catch block catch the error  can be inserted into one of the table .int he future you  can be refered that error
+		  raiserror(@ERROR_MESSAGE,16,16)
+		  end catch
+		  end
+
+
+		  exec usp_save_t8 @id=2,@name='bbbbbbbbbbbbbbb'
+		  select * from error_tbl1
+
+create table error_tbl1(errorid int ,err_message nvarchar(max),errordate datetime, procname nvarchar(500))
+
+---error table help the devolper which error occuered dont ask again and again to client  what is error  .error can be through away from catch block to error table
+--- how to get proc id 
+select * from sys.objects where name ='usp_save_t8'
+select OBJECT_NAME(142623551)
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- whenever query  is in a string take the string execute the 'exec string'or 'sp_executesql string'
+-- most of the scenarios use sp_executesql 
+----you have a simple string go to the 'exec string'
+---- actually it is required for execute
+--- when will we really required this
+example ::
+declare @query nvarchar(max)='select * from emp'--- this is query in string
+
+---exec @query
+  exec sp_executesql @query
+
+ ---1.when table name/column comes as dynamic (dynamic means tablename ,column names comes as a parameter ) then go to the dynamic sql
+ ---example of dynamic sql
+ -- this is extended stored procedure
+ -----@table name passing as a parameter go with dynamic sql
+ create proc usp_searchemp(@table varchar(1000))as
+ begin 
+     declare @query nvarchar(max)= 'select * from ' + @table---nvarchar(max) hold the 2 gb string ,query doesn't cross the 1 kb
+	 exec sp_executesql @query----- N number of parameters here puting--result through sp_executesql
+end	 
+
+exec usp_searchemp 'emp'
+
+---- whenever have you pass the value as a parameter don't want go with dynamic sql
+
+alter proc usp_getempresult (@ename varchar(100))as---- here schema passing the parameters go with dynamic sql
+begin
+  select * from emp where ename=@ename
+  end
+
+  exec usp_getempresult 'smith'
+  ------- @column_name and @value both are passing as a parameter go with dynamical sql
+   alter proc usp_getempsearch(@column_name nvarchar(1000),@value varchar(100))as
+   begin
+        declare @query nvarchar(max)='select * from emp where ' + @column_name + ' = '++char(39) +@value+char(39)--- prefix and post fix just have you concate the char(39) because single code
+		exec sp_executesql @query
+   end
+    exec usp_getempsearch 'ename','king'
+	
+advantage of sp_executesql ----we can eliminate sql injections
+
+------------optional parameter/null value parameters/default parameters go to the dynamic sql
+
+create proc searchemployee(@eid int =null,@ename varchar(100)=null,@sal money=null)as------ this is called 'or' clause
+begin
+
+select* from emp where (empno=@eid or @eid is null) and(ename=@ename or @ename is null)and (sal=@sal or @sal is null)
+
+end
+
+exec searchemployee @sal='800',@ename='smith'----- pass any one of them or neither of them or all of them
+-----both the parametes between and them so matching then give a result when both parameters are execute at a time 
+
+-- when evernot getting your mknd in or clause go to the dynamic sql 
+alter proc usp_searchemplyoee(@empno int =null,@ename varchar(100)=null,@sal money =null)as
+begin
+  declare @sql nvarchar(max)='select * from emp where 1=1'
+  if (@empno is not null)
+  begin
+      set @sql=@sql+' and empno=@l_empno'--- it is local parameters 
+  end
+  if (@ename is not null)
+  begin
+      set @sql=@sql+' and ename=@l_ename'
+  end
+  if (@sal is not null)
+  begin
+      set @sql=@sql+' and sal=@l_sal'
+  end
+  exec sp_executesql @sql, N'@l_empno int,@l_ename varchar(100),@l_sal money ' ,@l_empno=empno,@l_ename=@ename,@l_sal=@sal
+  --here whatever parameters are their +2 execute one is query second one is declaration third one is all assignmnets
+  end
+
+  exec usp_searchemplyoee  @ename='smith'---- not breaking the query any sinle code
+  ----------------------------------------------------------------------------------------------order by column how to write
+
+  alter proc usp_searchemplyoee(@empno int =null,@ename varchar(100)=null,@sal money =null,@order_column varchar(100)=sal,@order varchar(4))as
+begin
+  declare @sql nvarchar(max)='select * from emp where 1=1'
+  if (@empno is not null)
+  begin
+      set @sql=@sql+' and empno=@l_empno'--- it is local parameters 
+  end
+  if (@ename is not null)
+  begin
+      set @sql=@sql+' and ename=@l_ename'
+  end
+  if (@sal is not null)
+  begin
+      set @sql=@sql+' and sal=@l_sal'
+  end
+  set @sql=@sql+ ' order by '+ @order_column + ' ' + @order----- order by column
+  exec sp_executesql @sql, N'@l_empno int,@l_ename varchar(100),@l_sal money ' ,@l_empno=empno,@l_ename=@ename,@l_sal=@sal
+  --here whatever parameters are their +2 execute one is query second one is declaration third one is all assignmnets
+  end
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  output parameters::
+
+   create proc usp_savet1(@name varchar(100),@id int output)as
+   begin
+     insert into t9 values (@name)
+	 set @id = SCOPE_IDENTITY
+   end
+
+
+   create table t10 (id int identity , name varchar(100))
+   -------------------------------------------------------------------------------------------------------------------------------------------
+   alter proc usp_getempno(@deptno varchar(100),@empno int output)as
+   begin
+      select top 1 @deptno = deptno from emp where ename =@ename----- here is not use in * ,i want single value instead of the result.i am putting empno into variable
+	                                                            ----- whenever you ant single value don't use select* statement
+end
+
+declare @myempno int ---------------------------------- this is local variable
+exec usp_getempno 'deptno',@myempno output
+print @myempno
+
+--------- i will pass column name and will pass value i need pass column name i get result 
+ create proc usp_getresult (@ename varchar(100),@empno int)as
+ begin 
+  declare @sql nvarchar(max)=' select * from emp where'+@empno
+  set @
+
